@@ -20,7 +20,7 @@ interface LoginProps {
 export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const { switchUserRole, users, showToast } = useFinancial();
 
-  const [email, setEmail] = useState('admin@alfastore.com.br');
+  const [email, setEmail] = useState('daniel.silva@alfastore.com.br');
   const [password, setPassword] = useState('••••••••');
 
   const handleManualLogin = (e: React.FormEvent) => {
@@ -35,7 +35,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       switchUserRole('admin');
     }
 
-    showToast('Acesso autorizado! Bem-vindo ao FluxoPro.', 'success', 'Login Realizado');
+    showToast('Acesso autorizado! Bem-vindo, Daniel Silva.', 'success', 'Login Realizado');
     onLoginSuccess();
   };
 
@@ -94,7 +94,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                     <h5 className="text-xs font-bold text-white group-hover:text-purple-300">
                       Administrador (Acesso Total)
                     </h5>
-                    <p className="text-[10px] text-purple-300/70">Carlos Henrique Silva</p>
+                    <p className="text-[10px] text-purple-300/70">Daniel Silva</p>
                   </div>
                 </div>
                 <ArrowRight className="h-4 w-4 text-purple-400 group-hover:translate-x-1 transition-transform" />
@@ -161,7 +161,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full rounded-xl border border-slate-700 bg-slate-800/80 py-2.5 pl-10 pr-3 text-xs text-white focus:border-emerald-500 focus:outline-hidden"
-                  placeholder="admin@alfastore.com.br"
+                  placeholder="daniel.silva@alfastore.com.br"
                 />
               </div>
             </div>
@@ -198,7 +198,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               type="submit"
               className="w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs font-bold shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2"
             >
-              <span>Entrar no Sistema</span>
+              <span>Entrar como Daniel Silva (Admin)</span>
               <ArrowRight className="h-4 w-4" />
             </button>
           </form>

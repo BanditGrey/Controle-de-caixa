@@ -8,7 +8,6 @@ import {
   CompanySettings,
   NotificationItem,
   UserRole,
-  TransactionType,
 } from '../types';
 import {
   initialCategories,
@@ -143,12 +142,25 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   const [users, setUsers] = useState<User[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.USERS);
-    return saved ? JSON.parse(saved) : initialUsers;
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return parsed.map((u: User) =>
+        u.role === 'admin' ? { ...u, name: 'Daniel Silva', email: 'daniel.silva@alfastore.com.br' } : u
+      );
+    }
+    return initialUsers;
   });
 
   const [currentUser, setCurrentUser] = useState<User>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
-    return saved ? JSON.parse(saved) : initialUsers[0];
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.role === 'admin') {
+        return { ...parsed, name: 'Daniel Silva', email: 'daniel.silva@alfastore.com.br' };
+      }
+      return parsed;
+    }
+    return initialUsers[0];
   });
 
   const [company, setCompany] = useState<CompanySettings>(() => {
