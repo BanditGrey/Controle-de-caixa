@@ -1,20 +1,41 @@
-import React, { useState } from 'react';
-import { FinancialProvider } from './context/FinancialContext';
-import { MainLayout } from './components/layout/MainLayout';
-import { Login } from './pages/Login';
+import React, { useState, useEffect } from 'react';
+import { PortalLauncher } from './components/PortalLauncher';
+import { FinancialApp } from './modules/financial/FinancialApp';
+import { RequiemApp } from './modules/requiem/RequiemApp';
+
+export type AppMode = 'portal' | 'financial' | 'requiem';
 
 export function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [activeApp, setActiveApp] = useState<AppMode>(() => {
+    if (typeof window === 'undefined') return 'portal';
+    try {
+      const saved = localStorage.getItem('active_demo_app');
+      if (saved === 'financial' || saved === 'requiem' || saved === 'portal') {
+        return saved;
+      }
+    } catch {
+      // fallback
+    }
+    return 'portal';
+  });
 
-  return (
-    <FinancialProvider>
-      {isAuthenticated ? (
-        <MainLayout onLogout={() => setIsAuthenticated(false)} />
-      ) : (
-        <Login onLoginSuccess={() => setIsAuthenticated(true)} />
-      )}
-    </FinancialProvider>
-  );
+  useEffect(() => {
+    try {
+      localStorage.setItem('active_demo_app', activeApp);
+    } catch {
+      // fallback
+    }
+  }, [activeApp]);
+
+  if (activeApp === 'financial') {
+    return <FinancialApp onSwitchApp={() => setActiveApp('portal')} />;
+  }
+
+  if (activeApp === 'requiem') {
+    return <RequiemApp onSwitchApp={() => setActiveApp('portal')} />;
+  }
+
+  return <PortalLauncher onSelectApp={(app) => setActiveApp(app)} />;
 }
 
 export default App;
