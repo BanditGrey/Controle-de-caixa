@@ -1,257 +1,109 @@
-# 💼 FluxoPro - Sistema Completo de Controle de Caixa & Gestão Financeira
+# ⚔️ REQUIEM ASSET MANAGER — Requiem of Legends MMORPG
 
-Um **web app moderno, profissional, intuitivo e completo** para gestão e controle de fluxo de caixa diário, mensal e anual, projetado sob medida para **pequenos negócios, lojas, comércios e prestadores de serviços**.
-
-Desenvolvido com **React 19 + TypeScript + Vite + Tailwind CSS v4 + Recharts + Lucide Icons + jsPDF + XLSX**.
+Uma aplicação web completa, moderna e imersiva construída para o **Game Director Daniel Silva** gerenciar, organizar e acompanhar a produção de todos os assets de desenvolvimento do MMORPG Dark Fantasy **"Requiem of Legends"** (a união lendária entre as eras de **MU Online** e **With Your Destiny / WYD**).
 
 ---
 
-## 🚀 Principais Módulos & Funcionalidades
+## 🎨 Identidade Visual Dark Fantasy Medieval
 
-### 1. 📊 Dashboard Principal (Visão Executiva)
-- **KPIs em Tempo Real**:
-  - Saldo Atual de Caixa (com indicador de saúde financeira)
-  - Total de Entradas (Receitas do mês)
-  - Total de Saídas (Despesas do mês)
-  - Lucro Líquido / Resultado Operacional apurado
-  - Total de Contas a Pagar em aberto
-  - Total de Contas a Receber previstas
-- **Alertas Financeiros Ativos**:
-  - Alerta vermelho para contas em atraso (inadimplência)
-  - Alerta amarelo para contas com vencimento hoje
-  - Alerta de saldo abaixo do limite mínimo orçado
-- **Gráficos Interativos**:
-  - Evolução do Saldo Acumulado & Linha do Tempo (7 dias, 30 dias, 6 meses, 12 meses)
-  - Distribuição de Despesas & Receitas por Categoria (Gráfico Donut)
-  - Comparativo Mensal de Entradas vs Saídas com barras agrupadas
-  - Distribuição por Forma de Pagamento (PIX, Cartão de Crédito/Débito, Boleto, TED, Dinheiro)
-- **Últimas Movimentações** e **Próximos Vencimentos** com quitação em 1 clique.
+- **Tipografia Épica**: Google Fonts *Cinzel* para títulos e cabeçalhos medievais, *Inter* para legibilidade do corpo, e *Roboto Mono* para dados numéricos e caminhos técnicos.
+- **Paleta de Cores Clássica**:
+  - Fundo Profundo: `#0a0a0a` / Painéis `#141414`
+  - Dourado Lendário: `#c9a961` e `#f0d98c`
+  - Borda Entalhada e Molduras Duplas: `#3d2f1f`
+  - Sucesso / Concluído: `#27ae60`
+  - Em Progresso: `#f39c12`
+  - Crítico / Perigo: `#c0392b`
+- **Efeitos e Sons Web Audio**:
+  - Som cristalino inesquecível de drop/uso da **Jewel of Bless**
+  - Fanfarra triunfante de **Level Up** e conquista
+  - Cliques mecânicos e feedbacks táteis na interface
+  - Partículas de celebração com Confetti dourado
 
 ---
 
-### 2. 🟢 Controle de Entradas (Receitas)
-- Cadastro detalhado de recebimentos:
-  - Descrição, valor formatado (R$), data da operação
-  - Categoria da receita, forma de pagamento
-  - Cliente / Sacado, observações
-  - Recorrência (Única, Semanal, Mensal, Anual)
-  - Anexo / Comprovante digital com visualizador integrado
-  - Status: **Recebido** ou **Pendente**
-- Filtros rápidos por texto, categoria, meio de pagamento, status e intervalo de datas
-- Ações: Quitar/Alternar Status, Duplicar lançamento, Editar, Excluir e Visualizar Comprovante.
+## 📦 Estrutura de Módulos & Telas
+
+### 1. 🏰 Dashboard do Game Director (`/`)
+- Header nobre com branding de *Requiem of Legends*, nome de Daniel Silva, data e estatísticas em tempo real.
+- **4 Cards de Estatísticas com Glow**:
+  - 📂 **Total de Assets** (104 assets iniciais catalogados)
+  - ✅ **Concluídos** (com percentual e indicador verde)
+  - 🔄 **Em Progresso** (com spinner dourado)
+  - ⏳ **Pendentes** (com monitoramento de prioridades críticas)
+- **Barra de Progresso Principal Dourada**:
+  - Dinâmica com gradiente motivacional e animação suave
+  - Marcos visuais: 0% Início ➔ 30% MVP ➔ 70% Alpha Fechado ➔ 100% Lançamento
+- **Progresso Visual por Categoria**: Barras de progresso para cada um dos 8 módulos.
+- **Linha do Tempo de Atividades Recentes**: Histórico dos últimos 5 assets modificados.
+- **Widget de Sabedoria & Lore**: Citações dark fantasy rotativas do universo de Requiem.
+- **Oráculo de Criação ("O Que Fazer Agora?")**: Sorteador aleatório ponderado para orientar as próximas tarefas prioritárias.
+
+### 2. 🗃️ Gerenciador de Assets (`/assets`)
+- **Barra de Filtros Fixa (Sticky)**:
+  - Busca instantânea por nome, tag, subcategoria ou caminho original
+  - Filtros por Status (⏳ Pendente | 🔄 Em Progresso | ✅ Concluído)
+  - Filtros por Prioridade (🔥 Crítica | ⬆️ Alta | ➡️ Média | ⬇️ Baixa)
+  - Filtros por Origem (MU Online, WYD, Custom Requiem, IA, Marketplace, Free)
+  - Ordenação dinâmica (Data, Nome, Prioridade, Status, Modificação)
+- **3 Modos de Visualização Alternáveis**:
+  - 🖼️ **Modo Grade (Cards)**: Molduras douradas, pré-visualização gráfica ou upload de imagem, badges e menu de 3 pontos.
+  - 📋 **Modo Tabela / Lista**: Visão densa com zebra rows, seleção múltipla e ações diretas.
+  - 📌 **Modo Kanban Board**: Colunas para Pendente, Em Progresso e Concluído com movimentação instantânea entre colunas.
+- **Barra de Ações em Massa (Bulk Actions)**:
+  - Concluir selecionados, mover status, alterar prioridades ou exportar em lote.
+
+### 3. 🛡️ Categorias do MMORPG (`/categories`)
+8 módulos com contadores, badges de subgrupos e atalhos rápidos:
+1. 🎨 **ITEM** (Armas, armaduras, Joias Bless/Soul/Chaos, poções, pergaminhos)
+2. 👹 **MONSTER** (Budge Dragon, Spider, Hound, Bull Fighter, Skeleton Warrior, Lich, Cursed Wizard)
+3. 🗺️ **MAP** (Requiem Hub, Lorencia, Noria, Devias, Armia WYD, Azran WYD)
+4. 🎬 **ANIMATION** (Dano flutuante, Level up, Twisting Slash, Hellfire Nova, Screen shake)
+5. 🔊 **SOUND** (Chime da Bless, swing de espada, disparo de flecha, temas de Lorencia e Armia)
+6. 🎨 **UI** (Orbes de HP/MP, grade de 64 slots de inventário, moldura de mini-mapa, diálogos)
+7. 🧙 **CHARACTER** (Dark Knight, Dark Wizard, Fairy Elf, TransKnight, Foema)
+8. ✨ **EFFECT** (Aura divina Bless, fogo da Chaos Machine, explosão glacial, relâmpago)
+
+### 4. 📊 Progresso, Velocidade & Analytics (`/progress`)
+- Gráficos interativos com **Recharts**:
+  - Gráfico Donut de distribuição por Status
+  - Gráfico de Origem dos Assets (MU vs WYD vs Original vs IA)
+  - Gráfico de Barras com volume por categoria
+- Métricas de velocidade: Média de entrega diária e previsão calculada para fechamento do MVP.
+- Leaderboard de módulos com rankings e selos de conquista.
+
+### 5. 📚 Biblioteca de Ferramentas & Referências (`/references`)
+- Links e documentação categorizados:
+  - 🛠️ **Extração & 3D**: MU Model Viewer, WYD Studio, Blender 3D, OZJ Converter
+  - 🎁 **Recursos Grátis**: Game-Icons.net, Kenney.nl, OpenGameArt, FreeSound, LottieFiles, Mixamo
+  - 💎 **Marketplaces**: Synty Studios, Unity Asset Store, Sketchfab, Meshy AI
+  - 🤖 **Ferramentas de IA**: Midjourney, DALL-E 3, Stable Diffusion, Leonardo.ai
+- Formulário para registrar novos links e ferramentas personalizadas.
+
+### 6. ⚙️ Configurações & Gestão de Dados (`/settings`)
+- Metadados do projeto (*Requiem of Legends*, Game Director Daniel Silva, datas, links GitHub e Discord).
+- Preferências visuais e toggles de áudio Web Audio e partículas.
+- **Exportação JSON**: Backup completo local de todos os assets.
+- **Exportação Excel (.xlsx)**: Planilha categorizada com múltiplas abas.
+- **Importação JSON**: Restauração instantânea de backups.
+- **Restauração de Dados**: Recarregar os 104 assets originais a qualquer momento.
 
 ---
 
-### 3. 🔴 Controle de Saídas (Despesas)
-- Cadastro completo de desembolsos operacionais:
-  - Descrição, valor, data do pagamento
-  - Categoria de centro de custo, fornecedor / beneficiário
-  - Forma de pagamento, notas e anexo de nota fiscal / recibo
-  - Status: **Pago** ou **Pendente**
-- Totalizadores automáticos de Despesas Pagas vs Despesas Pendentes
-- Alertas de maior centro de custo do período.
-
----
-
-### 4. 📈 Fluxo de Caixa Consolidado & DRE
-- **Fórmula Visual de Caixa**:
-  $$\text{Saldo Inicial} + \text{Entradas} - \text{Saídas} = \text{Saldo Final}$$
-- Navegação fluida por mês e ano
-- Extrato diário detalhado com número de operações, saldo do dia e saldo acumulado
-- Exportação direta para **PDF**, **Planilha Excel (.xlsx)** e **Impressão A4**.
-
----
-
-### 5. 📑 Contas a Pagar
-- Controle rigoroso de obrigações e boletos:
-  - Abas: *Todas*, *Pendentes*, *Vencendo Hoje*, *Vencidas (Atraso)* e *Pagas*
-  - Código de barras e linha digitável com botão de **Cópia em 1 Clique**
-  - **Quitação Integrada no Caixa**: Baixa total ou parcial que gera automaticamente o lançamento de saída correspondente no fluxo financeiro
-  - Alerta customizável de antecedência (1, 3, 5 ou 7 dias antes).
-
----
-
-### 6. 💵 Contas a Receber
-- Gestão de contratos, cobranças e faturamento futuro:
-  - Abas de status: *Todas*, *Pendentes*, *Vencendo Hoje*, *Em Atraso* e *Recebidas*
-  - **Confirmação de Recebimento**: Baixa no ato alimentando o caixa em tempo real
-  - Controle de inadimplência e aging list.
-
----
-
-### 7. 🏷️ Categorias Financeiras & Centros de Custo
-- Gerenciamento completo de categorias de receitas e despesas:
-  - Nome, cor personalizada e seletor com mais de **25 ícones profissionais**
-  - **Teto Orçamentário (Budget)**: Barra de progresso visual que monitora os gastos contra a meta mensal, alertando se ultrapassar 80% ou estourar o limite.
-
----
-
-### 8. 📜 Histórico Unificado & Extrato Geral
-- Visão consolidada de todas as transações (Entradas e Saídas)
-- Filtros multicritério combinados (Tipo, Busca, Categoria, Meio de Pagamento, Status, Período)
-- Ordenação dinâmica por Data, Valor e Descrição
-- Paginação configurável (10, 15, 25 ou 50 itens por página)
-- Exportação em lote para **CSV**, **Excel** e **PDF**.
-
----
-
-### 9. 📊 Relatórios & DRE Simplificado
-- **Demonstração do Resultado do Exercício (DRE)**:
-  - Receita Bruta
-  - (-) Custos de Mercadorias e Fornecedores
-  - (=) Lucro Bruto
-  - (-) Despesas Operacionais detalhadas por categoria
-  - (=) Resultado Líquido do Período
-  - Margem Operacional Líquida (%)
-- Relatório de Despesas por Categoria com % de participação
-- Relatório de Receitas por Categoria e Top Clientes
-- Filtros por: *Este Mês*, *Mês Anterior*, *Trimestre* e *Ano Completo*
-- Exportação em **PDF formatado com cabeçalho corporativo, CNPJ e data de emissão**, **Excel (.xlsx)** e **Modo Impressão**.
-
----
-
-### 10. ⚙️ Configurações, Backup & Segurança
-- Dados da empresa (Razão Social, Nome Fantasia, CNPJ, E-mail, Telefone, Endereço)
-- Definição do Saldo Inicial de Abertura e Limite de Saldo Baixo
-- **Exportação de Backup Completo (JSON)** com 1 clique
-- **Restauração de Backup (JSON)** com validação de integridade
-- **Reset de Fábrica** para dados de demonstração.
-
----
-
-### 11. 👥 Controle de Usuários & Níveis de Acesso
-- Simulador rápido de perfis no cabeçalho:
-  - **Administrador**: Acesso total a todas as operações, cadastros, relatórios e configurações
-  - **Financeiro**: Lançamento de movimentações, quitação de contas e relatórios
-  - **Visualizador**: Consulta de painéis, extratos e relatórios (modo somente leitura)
-- Gestão de membros da equipe (nome, e-mail, departamento, telefone e papel)
-- Matriz comparativa visual de permissões.
-
----
-
-### 12. 👤 Perfil do Usuário & Tema
-- Painel pessoal do colaborador conectado
-- Alternância instantânea entre **Modo Escuro (Dark Mode)** e **Modo Claro (Light Mode)**
-- Simulação de alteração de senha segura.
-
----
-
-## 🛠️ Tecnologias Utilizadas
-
-- **Frontend**: React 19, TypeScript
-- **Estilização**: Tailwind CSS v4 com paleta fintech personalizada
-- **Gráficos**: Recharts (AreaChart, PieChart, BarChart)
-- **Ícones**: Lucide React
-- **Exportação de Relatórios**:
-  - `jspdf` & `jspdf-autotable` para PDF profissional
-  - `xlsx` para planilhas Excel (.xlsx)
-  - Geração nativa de arquivos CSV UTF-8
-- **Persistência**: `LocalStorage` reativo com sincronização automática e geração de dados iniciais de demonstração (seed data).
-
----
-
-## 💻 Como Rodar o Projeto Localmente
+## 💻 Como Rodar o Projeto
 
 ```bash
-# 1. Clone o repositório
-git clone https://github.com/BanditGrey/Controle-de-caixa.git
-cd Controle-de-caixa
-
-# 2. Instale as dependências
+# Instalar dependências
 npm install
 
-# 3. Inicie o servidor de desenvolvimento
+# Iniciar servidor de desenvolvimento
 npm run dev
 
-# 4. Acesse no navegador
-http://localhost:5173
+# Gerar build de produção
+npm run build
 ```
 
 ---
 
-## 🗄️ Sugestão de Modelagem de Banco de Dados (Para Expansão Backend)
-
-Para conectar o sistema a um backend relacional (ex: PostgreSQL / Supabase / MySQL) ou NoSQL (Firebase), recomenda-se a seguinte estrutura:
-
-```sql
--- Tabela de Usuários e Perfis
-CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(255) NOT NULL,
-  email VARCHAR(255) UNIQUE NOT NULL,
-  role VARCHAR(50) NOT NULL CHECK (role IN ('admin', 'financeiro', 'visualizador')),
-  department VARCHAR(100),
-  avatar_url TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Tabela de Categorias
-CREATE TABLE categories (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(100) NOT NULL,
-  type VARCHAR(20) NOT NULL CHECK (type IN ('receita', 'despesa')),
-  color VARCHAR(20) NOT NULL,
-  icon VARCHAR(50) NOT NULL,
-  budget_limit NUMERIC(15, 2),
-  description TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Tabela de Movimentações de Caixa
-CREATE TABLE transactions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  type VARCHAR(20) NOT NULL CHECK (type IN ('receita', 'despesa')),
-  description VARCHAR(255) NOT NULL,
-  amount NUMERIC(15, 2) NOT NULL,
-  date DATE NOT NULL,
-  category_id UUID REFERENCES categories(id),
-  payment_method VARCHAR(50) NOT NULL,
-  entity_name VARCHAR(255),
-  status VARCHAR(20) NOT NULL CHECK (status IN ('recebido', 'pago', 'pendente')),
-  recurrence VARCHAR(50) DEFAULT 'única',
-  notes TEXT,
-  attachment_url TEXT,
-  reference_id UUID,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Tabela de Contas a Pagar
-CREATE TABLE accounts_payable (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  description VARCHAR(255) NOT NULL,
-  supplier VARCHAR(255) NOT NULL,
-  category_id UUID REFERENCES categories(id),
-  amount NUMERIC(15, 2) NOT NULL,
-  paid_amount NUMERIC(15, 2) DEFAULT 0,
-  due_date DATE NOT NULL,
-  payment_date DATE,
-  status VARCHAR(20) NOT NULL CHECK (status IN ('pendente', 'pago', 'vencido', 'parcial')),
-  payment_method VARCHAR(50),
-  barcode TEXT,
-  alert_days INT DEFAULT 3,
-  notes TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Tabela de Contas a Receber
-CREATE TABLE accounts_receivable (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  description VARCHAR(255) NOT NULL,
-  client VARCHAR(255) NOT NULL,
-  category_id UUID REFERENCES categories(id),
-  amount NUMERIC(15, 2) NOT NULL,
-  received_amount NUMERIC(15, 2) DEFAULT 0,
-  due_date DATE NOT NULL,
-  received_date DATE,
-  status VARCHAR(20) NOT NULL CHECK (status IN ('pendente', 'recebido', 'vencido', 'parcial')),
-  payment_method VARCHAR(50),
-  notes TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
----
-
-## 🎨 Atalhos do Teclado
-- `Ctrl + N` ou `Cmd + N`: Abre o menu flutuante de **Ações Rápidas** (+ Entrada, + Saída, + Conta a Pagar, + Conta a Receber, + Relatórios).
-- `Esc`: Fecha qualquer modal ou visualizador ativo.
+*Requiem of Legends — Onde duas lendas se tornam uma.*  
+**Game Director**: Daniel Silva

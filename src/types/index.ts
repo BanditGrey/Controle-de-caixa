@@ -1,139 +1,106 @@
-export type TransactionType = 'receita' | 'despesa';
+export type AssetCategory = 
+  | 'ITEM'
+  | 'MONSTER'
+  | 'MAP'
+  | 'ANIMATION'
+  | 'SOUND'
+  | 'UI'
+  | 'CHARACTER'
+  | 'EFFECT';
 
-export type PaymentMethod = 
-  | 'PIX'
-  | 'Cartão de Crédito'
-  | 'Cartão de Débito'
-  | 'Boleto'
-  | 'Dinheiro'
-  | 'Transferência TED';
+export type AssetStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
 
-export type TransactionStatus = 'recebido' | 'pago' | 'pendente';
+export type Priority = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
 
-export type AccountStatus = 'pendente' | 'pago' | 'recebido' | 'vencido' | 'parcial';
+export type AssetOrigin = 
+  | 'MU' 
+  | 'WYD' 
+  | 'CUSTOM' 
+  | 'AI_GENERATED' 
+  | 'PURCHASED' 
+  | 'FREE_LICENSE';
 
-export type RecurrenceType = 'única' | 'mensal' | 'anual' | 'semanal';
+export interface AssetMetadata {
+  dimensions?: string;           // Ex: "64x64", "512x512"
+  fileSize?: string;             // Ex: "12KB", "2.4MB"
+  format?: string;               // Ex: "png", "glb", "ogg", "json", "svg"
+  duration?: number;             // Segundos (para animações/sons)
+  color?: string;                // Cor predominante (#c9a961)
+  version?: string;              // Ex: "v1.2"
+  [key: string]: any;
+}
 
-export type UserRole = 'admin' | 'financeiro' | 'visualizador';
+export interface AssetActivity {
+  id: string;
+  timestamp: string;             // ISO date string
+  action: string;                // Ex: "Criado", "Status alterado para Concluído"
+  note?: string;
+  previousStatus?: AssetStatus;
+  newStatus?: AssetStatus;
+}
 
-export interface Category {
+export interface Asset {
+  id: string;
+  name: string;                    // Nome PT-BR
+  category: AssetCategory;
+  subcategory?: string;            // Ex: "weapon-sword", "potion", "beast"
+  status: AssetStatus;
+  priority: Priority;
+  origin: AssetOrigin;
+  originalReference?: string;      // Ex: "MU/Item/Sword01.bmd"
+  targetPath?: string;             // Ex: "assets/icons/items/short-sword.png"
+  fileUrl?: string;                // URL do arquivo (quando pronto)
+  previewUrl?: string;             // URL de imagem / base64 preview
+  iconType?: string;               // Identificador do ícone decorativo
+  notes?: string;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+  completedAt?: string;
+  metadata?: AssetMetadata;
+  activities?: AssetActivity[];
+}
+
+export interface ProjectSettings {
+  name: string;
+  director: string;
+  description: string;
+  startDate: string;
+  targetDate?: string;
+  githubUrl?: string;
+  discordUrl?: string;
+  soundEnabled: boolean;
+  particlesEnabled: boolean;
+  theme: 'dark-gold' | 'obsidian-crimson' | 'ethereal-azure' | 'emerald-forest';
+  density: 'compact' | 'normal' | 'spacious';
+}
+
+export interface ReferenceTool {
   id: string;
   name: string;
-  type: TransactionType;
-  color: string;
-  icon: string;
-  budgetLimit?: number; // Limite mensal orçado
-  description?: string;
-}
-
-export interface Attachment {
-  name: string;
-  size: string;
-  type: string;
-  url?: string;
-  date: string;
-}
-
-export interface Transaction {
-  id: string;
-  type: TransactionType;
+  category: 'EXTRACTOR' | 'FREE_RESOURCE' | 'MARKETPLACE' | 'AI_TOOL' | 'DOCS';
   description: string;
-  amount: number;
-  date: string; // YYYY-MM-DD
-  categoryId: string;
-  paymentMethod: PaymentMethod;
-  entityName: string; // Cliente para receita, Fornecedor para despesa
-  status: 'recebido' | 'pago' | 'pendente';
-  notes?: string;
-  attachment?: Attachment;
-  recurrence?: RecurrenceType;
-  referenceId?: string; // Link to account payable/receivable
-  createdAt: string;
-  updatedAt?: string;
+  url: string;
+  cost: string;                   // 'Grátis', 'Freemium', 'Pago', 'Open Source'
+  tags: string[];
+  iconName?: string;
+  featured?: boolean;
 }
 
-export interface AccountPayable {
-  id: string;
-  description: string;
-  supplier: string;
-  categoryId: string;
-  amount: number;
-  paidAmount?: number;
-  dueDate: string; // YYYY-MM-DD
-  paymentDate?: string;
-  status: 'pendente' | 'pago' | 'vencido' | 'parcial';
-  paymentMethod?: PaymentMethod;
-  recurrence: RecurrenceType;
-  notes?: string;
-  barcode?: string;
-  alertDays: number;
-  attachment?: Attachment;
-  createdAt: string;
+export interface FilterState {
+  search: string;
+  categories: AssetCategory[];
+  status: AssetStatus[];
+  priority: Priority[];
+  origins: AssetOrigin[];
+  sortBy: 'name-asc' | 'name-desc' | 'priority' | 'status' | 'category' | 'date-newest' | 'date-oldest' | 'updated';
+  viewMode: 'grid' | 'list' | 'kanban';
 }
 
-export interface AccountReceivable {
-  id: string;
-  description: string;
-  client: string;
-  categoryId: string;
-  amount: number;
-  receivedAmount?: number;
-  dueDate: string; // YYYY-MM-DD
-  receivedDate?: string;
-  status: 'pendente' | 'recebido' | 'vencido' | 'parcial';
-  paymentMethod?: PaymentMethod;
-  recurrence: RecurrenceType;
-  notes?: string;
-  attachment?: Attachment;
-  createdAt: string;
-}
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  avatar?: string;
-  phone?: string;
-  department?: string;
-  lastLogin?: string;
-  active: boolean;
-}
-
-export interface CompanySettings {
-  companyName: string;
-  tradingName: string; // Nome fantasia
-  cnpj: string;
-  email: string;
-  phone: string;
-  address: string;
-  currency: string; // 'BRL'
-  currencySymbol: string; // 'R$'
-  initialBalance: number;
-  lowBalanceThreshold: number;
-  dueAlertDays: number;
-  darkMode: boolean;
-  enableSound: boolean;
-  enableAlerts: boolean;
-  monthlyRevenueGoal: number;
-}
-
-export interface NotificationItem {
-  id: string;
-  title: string;
-  message: string;
-  type: 'danger' | 'warning' | 'info' | 'success';
-  date: string;
-  read: boolean;
-  linkTo?: string;
-}
-
-export type PeriodFilter = 
-  | 'hoje'
-  | '7dias'
-  | '30dias'
-  | 'este_mes'
-  | 'mes_anterior'
-  | 'este_ano'
-  | 'ano_anterior'
-  | 'personalizado';
+export type NavigationTab = 
+  | 'dashboard'
+  | 'assets'
+  | 'categories'
+  | 'progress'
+  | 'references'
+  | 'settings';

@@ -1,368 +1,335 @@
 import React, { useState } from 'react';
-import {
-  Wallet,
-  ArrowDownLeft,
-  ArrowUpRight,
+import { useAssets } from '../context/AssetContext';
+import { 
+  Layers, 
+  CheckCircle2, 
+  Loader2, 
+  Clock, 
+  Plus, 
+  ArrowRight, 
+  Sparkles, 
+  Flame, 
+  Compass, 
+  Quote, 
+  RefreshCw,
   TrendingUp,
-  Receipt,
-  FileCheck2,
-  AlertTriangle,
-  CheckCircle2,
-  FileText,
-  Clock,
+  Dices
 } from 'lucide-react';
-import { useFinancial } from '../context/FinancialContext';
-import { StatCard } from '../components/common/StatCard';
-import { Badge } from '../components/common/Badge';
-import { BalanceEvolutionAreaChart } from '../components/charts/BalanceEvolutionAreaChart';
-import { CategoryPieChart } from '../components/charts/CategoryPieChart';
-import { CashFlowBarChart } from '../components/charts/CashFlowBarChart';
-import { PaymentMethodChart } from '../components/charts/PaymentMethodChart';
-import { formatCurrency, formatDate, getDaysDiff } from '../utils/formatters';
-import { Transaction, AccountPayable } from '../types';
-import { FileViewerModal } from '../components/common/FileViewerModal';
+import { AssetIcon } from '../components/common/AssetIcon';
+import { StatusBadge, PriorityBadge } from '../components/common/Badge';
+import { LORE_QUOTES } from '../data/quotes';
+import { CATEGORY_DETAILS, formatRelativeTime } from '../utils/formatters';
+import { Asset, AssetCategory } from '../types';
+import { sounds } from '../utils/soundEffects';
 
-interface DashboardProps {
-  onNavigate: (page: string) => void;
-  onOpenNewIncome: () => void;
-  onOpenNewExpense: () => void;
-  onOpenPayBill: (bill: AccountPayable) => void;
-}
+export const Dashboard: React.FC = () => {
+  const { 
+    assets, 
+    stats, 
+    projectSettings, 
+    setActiveTab, 
+    setFilters, 
+    setIsCreateModalOpen, 
+    setIsRandomModalOpen,
+    setActiveModalAsset,
+    setIsDetailModalOpen 
+  } = useAssets();
 
-export const Dashboard: React.FC<DashboardProps> = ({
-  onNavigate,
-  onOpenNewIncome,
-  onOpenNewExpense,
-  onOpenPayBill,
-}) => {
-  const {
-    company,
-    currentBalance,
-    monthIncome,
-    monthExpense,
-    monthNet,
-    pendingPayablesTotal,
-    pendingReceivablesTotal,
-    overduePayablesCount,
-    todayDueCount,
-    transactions,
-    accountsPayable,
-    categoriesMap,
-  } = useFinancial();
+  const [quoteIndex, setQuoteIndex] = useState(0);
 
-  const [selectedAttachmentTx, setSelectedAttachmentTx] = useState<Transaction | null>(null);
+  const currentQuote = LORE_QUOTES[quoteIndex % LORE_QUOTES.length];
 
-  // Recent transactions (last 6)
-  const recentTransactions = transactions.slice(0, 6);
+  const handleNextQuote = () => {
+    sounds.playClick();
+    setQuoteIndex(prev => prev + 1);
+  };
 
-  // Urgent pending payables (due today or overdue)
-  const urgentPayables = accountsPayable
-    .filter((b) => b.status === 'pendente' || b.status === 'vencido' || b.status === 'parcial')
-    .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+  // Recent 5 modified assets
+  const recentAssets = [...assets]
+    .sort((a: Asset, b: Asset) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    .slice(0, 5);
+
+  // Critical pending assets
+  const criticalPendingAssets = assets
+    .filter(a => a.status !== 'COMPLETED' && (a.priority === 'CRITICAL' || a.priority === 'HIGH'))
     .slice(0, 4);
 
-  // Low balance alert condition
-  const isLowBalance = currentBalance < company.lowBalanceThreshold;
+  const categories: AssetCategory[] = ['ITEM', 'MONSTER', 'MAP', 'ANIMATION', 'SOUND', 'UI', 'CHARACTER', 'EFFECT'];
+
+  // Color determination for main progress bar
+  const getProgressColor = (pct: number) => {
+    if (pct >= 70) return 'from-[#27ae60] to-[#2ecc71]';
+    if (pct >= 30) return 'from-[#c9a961] to-[#f0d98c]';
+    return 'from-[#c0392b] to-[#e74c3c]';
+  };
+
+  const handleCategoryClick = (cat: AssetCategory) => {
+    sounds.playClick();
+    setFilters(prev => ({ ...prev, categories: [cat] }));
+    setActiveTab('assets');
+  };
+
+  const handleAssetClick = (asset: Asset) => {
+    sounds.playClick();
+    setActiveModalAsset(asset);
+    setIsDetailModalOpen(true);
+  };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Active Alerts Banner */}
-      {(overduePayablesCount > 0 || todayDueCount > 0 || isLowBalance) && (
-        <div className="space-y-2">
-          {overduePayablesCount > 0 && (
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between rounded-2xl border border-rose-200 bg-rose-50/95 p-3.5 sm:p-4 text-xs dark:border-rose-900/60 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 shadow-2xs gap-2">
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-500 text-white shrink-0">
-                  <AlertTriangle className="h-4 w-4" />
-                </div>
-                <div>
-                  <strong className="font-bold">Atenção aos vencimentos!</strong> Você possui{' '}
-                  <span className="font-bold">{overduePayablesCount} conta(s) em atraso</span>.
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => onNavigate('contas-pagar')}
-                className="font-bold underline hover:opacity-80 shrink-0 self-end sm:self-auto text-xs"
-              >
-                Ver Contas →
-              </button>
+    <div className="space-y-8 pb-12">
+      
+      {/* Epic Hero Welcome Banner */}
+      <div className="relative overflow-hidden rounded-2xl border border-[#c9a961]/40 bg-gradient-to-r from-[#17120a] via-[#1f180d] to-[#120e08] p-6 sm:p-8 shadow-[0_0_30px_rgba(0,0,0,0.8)] medieval-frame">
+        <div className="corner-ornament-tl" />
+        <div className="corner-ornament-tr" />
+        <div className="corner-ornament-bl" />
+        <div className="corner-ornament-br" />
+
+        {/* Subtle background rune glow */}
+        <div className="absolute -right-16 -top-16 w-64 h-64 bg-[#c9a961]/5 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#c9a961]/15 border border-[#c9a961]/30 text-xs font-mono text-[#f0d98c]">
+              <Sparkles size={13} className="text-[#c9a961] animate-spin" style={{ animationDuration: '6s' }} />
+              <span>PAINEL DO GAME DIRECTOR</span>
             </div>
-          )}
 
-          {isLowBalance && (
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between rounded-2xl border border-amber-200 bg-amber-50/95 p-3.5 sm:p-4 text-xs dark:border-amber-900/60 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 shadow-2xs gap-2">
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500 text-white shrink-0">
-                  <Wallet className="h-4 w-4" />
-                </div>
-                <div>
-                  <strong className="font-bold">Alerta de Saldo:</strong> Caixa abaixo do limite configurado de{' '}
-                  {formatCurrency(company.lowBalanceThreshold, company.currencySymbol)}.
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => onNavigate('configuracoes')}
-                className="font-bold underline hover:opacity-80 shrink-0 self-end sm:self-auto text-xs"
-              >
-                Ajustar Limite →
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-cinzel font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-[#f0d98c] via-[#c9a961] to-[#8b7c4f]">
+              {projectSettings.name}
+            </h2>
 
-      {/* Main KPI Stat Cards (2 columns on mobile, 3 on tablet, 6 on desktop) */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2.5 sm:gap-4">
-        {/* Saldo Atual */}
-        <StatCard
-          title="Saldo Caixa"
-          value={formatCurrency(currentBalance, company.currencySymbol)}
-          icon={Wallet}
-          variant={currentBalance >= 0 ? 'emerald' : 'rose'}
-          subtitle="Saldo em conta e caixa"
-          action={{
-            label: 'Extrato',
-            onClick: () => onNavigate('fluxo-caixa'),
-          }}
-        />
+            <p className="text-xs sm:text-sm text-[#8a7c5c] max-w-2xl leading-relaxed">
+              Bem-vindo, <strong className="text-[#e8d9b0]">{projectSettings.director}</strong>. Gerencie o desenvolvimento de todos os assets 2D, 3D, áudio e animações do MMORPG que unirá as lendas de MU Online e WYD.
+            </p>
+          </div>
 
-        {/* Entradas do Mês */}
-        <StatCard
-          title="Entradas (Mês)"
-          value={formatCurrency(monthIncome, company.currencySymbol)}
-          icon={ArrowDownLeft}
-          variant="emerald"
-          subtitle="Receitas realizadas"
-          action={{
-            label: '+ Nova',
-            onClick: onOpenNewIncome,
-          }}
-        />
-
-        {/* Saídas do Mês */}
-        <StatCard
-          title="Saídas (Mês)"
-          value={formatCurrency(monthExpense, company.currencySymbol)}
-          icon={ArrowUpRight}
-          variant="rose"
-          subtitle="Despesas pagas"
-          action={{
-            label: '+ Nova',
-            onClick: onOpenNewExpense,
-          }}
-        />
-
-        {/* Lucro / Resultado Líquido */}
-        <StatCard
-          title="Resultado Líquido"
-          value={formatCurrency(monthNet, company.currencySymbol)}
-          icon={TrendingUp}
-          variant={monthNet >= 0 ? 'purple' : 'rose'}
-          trend={{
-            value: monthNet >= 0 ? 'Lucro' : 'Prejuízo',
-            isPositive: monthNet >= 0,
-          }}
-        />
-
-        {/* Contas a Pagar */}
-        <StatCard
-          title="Contas a Pagar"
-          value={formatCurrency(pendingPayablesTotal, company.currencySymbol)}
-          icon={Receipt}
-          variant="amber"
-          subtitle={overduePayablesCount > 0 ? `${overduePayablesCount} vencidas!` : 'A vencer'}
-          onClick={() => onNavigate('contas-pagar')}
-        />
-
-        {/* Contas a Receber */}
-        <StatCard
-          title="Contas a Receber"
-          value={formatCurrency(pendingReceivablesTotal, company.currencySymbol)}
-          icon={FileCheck2}
-          variant="blue"
-          subtitle="Previsão esperada"
-          onClick={() => onNavigate('contas-receber')}
-        />
-      </div>
-
-      {/* Row 1: Charts (Evolution + Category Distribution) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
-        <div className="lg:col-span-7">
-          <BalanceEvolutionAreaChart />
-        </div>
-        <div className="lg:col-span-5">
-          <CategoryPieChart />
-        </div>
-      </div>
-
-      {/* Row 2: Charts (Monthly Comparison + Payment Methods) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
-        <div className="lg:col-span-7">
-          <CashFlowBarChart />
-        </div>
-        <div className="lg:col-span-5">
-          <PaymentMethodChart />
-        </div>
-      </div>
-
-      {/* Row 3: Recent Transactions & Upcoming Payables */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
-        {/* Recent Transactions */}
-        <div className="lg:col-span-8 rounded-2xl bg-white p-4 sm:p-5 shadow-xs border border-slate-200/80 dark:bg-slate-900 dark:border-slate-800">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">
-                Últimas Movimentações
-              </h3>
-              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
-                Lançamentos recentes de caixa
-              </p>
-            </div>
+          {/* Action CTAs */}
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
             <button
-              type="button"
-              onClick={() => onNavigate('historico')}
-              className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+              onClick={() => {
+                sounds.playClick();
+                setIsCreateModalOpen(true);
+              }}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-cinzel font-bold text-sm bg-gradient-to-r from-[#c9a961] to-[#8b7c4f] text-black hover:brightness-110 shadow-lg shadow-[#c9a961]/25 transition-all cursor-pointer"
             >
-              Ver Todas ({transactions.length}) →
+              <Plus size={18} className="stroke-[3]" />
+              <span>Forjar Novo Asset</span>
+            </button>
+            <button
+              onClick={() => {
+                sounds.playBlessChime();
+                setIsRandomModalOpen(true);
+              }}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#c9a961]/40 bg-[#1c170f] hover:bg-[#2a2214] text-xs font-semibold text-[#f0d98c] transition-all cursor-pointer"
+            >
+              <Dices size={16} />
+              <span>O Que Fazer Agora?</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 4 Stat Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        {/* Total Assets */}
+        <div className="relative p-5 rounded-xl bg-[#141414] border border-[#3d2f1f] shadow-md hover:border-[#c9a961]/60 transition-all medieval-frame group">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-cinzel text-[#8a7c5c] tracking-wider uppercase">
+              Total de Assets
+            </span>
+            <div className="p-2 rounded-lg bg-[#1c170f] border border-[#c9a961]/30 text-[#c9a961] group-hover:scale-110 transition-transform">
+              <Layers size={18} />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-mono font-bold text-[#e8d9b0]">
+              {stats.total}
+            </span>
+            <span className="text-xs text-[#8a7c5c] font-mono">cadastrados</span>
+          </div>
+          <div className="mt-3 text-[11px] text-[#8a7c5c] flex items-center justify-between border-t border-[#3d2f1f]/50 pt-2">
+            <span>8 categorias</span>
+            <span className="text-[#c9a961] font-mono">100% catalogado</span>
+          </div>
+        </div>
+
+        {/* Concluídos */}
+        <div className="relative p-5 rounded-xl bg-[#141414] border border-[#27ae60]/40 shadow-md hover:border-[#27ae60] transition-all medieval-frame group">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-cinzel text-[#2ecc71] tracking-wider uppercase font-semibold">
+              Concluídos
+            </span>
+            <div className="p-2 rounded-lg bg-[#0e2417] border border-[#27ae60]/40 text-[#2ecc71] group-hover:scale-110 transition-transform">
+              <CheckCircle2 size={18} />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-mono font-bold text-[#2ecc71]">
+              {stats.completed}
+            </span>
+            <span className="text-xs text-[#2ecc71]/80 font-mono font-semibold">
+              ({stats.completionPercentage}%)
+            </span>
+          </div>
+          <div className="mt-3 text-[11px] text-[#8a7c5c] flex items-center justify-between border-t border-[#3d2f1f]/50 pt-2">
+            <span>Prontos para o jogo</span>
+            <span className="text-[#2ecc71] font-mono font-bold">✓ Aprovados</span>
+          </div>
+        </div>
+
+        {/* Em Progresso */}
+        <div className="relative p-5 rounded-xl bg-[#141414] border border-[#f39c12]/40 shadow-md hover:border-[#f39c12] transition-all medieval-frame group">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-cinzel text-[#f1c40f] tracking-wider uppercase font-semibold">
+              Em Progresso
+            </span>
+            <div className="p-2 rounded-lg bg-[#291f0e] border border-[#f39c12]/40 text-[#f1c40f] group-hover:scale-110 transition-transform">
+              <Loader2 size={18} className="animate-spin" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-mono font-bold text-[#f1c40f]">
+              {stats.inProgress}
+            </span>
+            <span className="text-xs text-[#f1c40f]/80 font-mono">
+              ({stats.total > 0 ? Math.round((stats.inProgress / stats.total) * 100) : 0}%)
+            </span>
+          </div>
+          <div className="mt-3 text-[11px] text-[#8a7c5c] flex items-center justify-between border-t border-[#3d2f1f]/50 pt-2">
+            <span>Em modelagem / arte</span>
+            <span className="text-[#f1c40f] font-mono">Em forja ativa</span>
+          </div>
+        </div>
+
+        {/* Pendentes */}
+        <div className="relative p-5 rounded-xl bg-[#141414] border border-[#3d2f1f] shadow-md hover:border-[#7f8c8d] transition-all medieval-frame group">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-cinzel text-[#8a7c5c] tracking-wider uppercase">
+              Pendentes
+            </span>
+            <div className="p-2 rounded-lg bg-[#1a1a1a] border border-[#3d2f1f] text-[#bdc3c7] group-hover:scale-110 transition-transform">
+              <Clock size={18} />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-mono font-bold text-[#bdc3c7]">
+              {stats.pending}
+            </span>
+            <span className="text-xs text-[#8a7c5c] font-mono">
+              ({stats.total > 0 ? Math.round((stats.pending / stats.total) * 100) : 0}%)
+            </span>
+          </div>
+          <div className="mt-3 text-[11px] text-[#8a7c5c] flex items-center justify-between border-t border-[#3d2f1f]/50 pt-2">
+            <span>No backlog</span>
+            <span className="text-[#e74c3c] font-mono">{stats.criticalPending} críticos</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Golden Progress Bar Card */}
+      <div className="p-6 rounded-2xl bg-[#141414] border border-[#c9a961]/50 shadow-xl medieval-frame">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+          <div>
+            <span className="text-xs font-cinzel font-bold text-[#c9a961] uppercase tracking-wider block">
+              Progresso Geral de Criação
+            </span>
+            <h3 className="text-lg sm:text-xl font-cinzel font-bold text-[#e8d9b0] mt-0.5">
+              {stats.completed} de {stats.total} assets concluídos ({stats.completionPercentage}%)
+            </h3>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className={`text-xs font-mono px-3 py-1 rounded-full border ${
+              stats.completionPercentage >= 70
+                ? 'border-[#27ae60] bg-[#0e2417] text-[#2ecc71]'
+                : stats.completionPercentage >= 30
+                ? 'border-[#c9a961] bg-[#1c170f] text-[#f0d98c]'
+                : 'border-[#c0392b] bg-[#240e0e] text-[#e74c3c]'
+            }`}>
+              {stats.completionPercentage >= 70 ? '🚀 Quase Pronto!' : stats.completionPercentage >= 30 ? '⚔️ A Todo Vapor' : '🔥 Início de Jornada'}
+            </span>
+          </div>
+        </div>
+
+        {/* Large Animated Bar */}
+        <div className="relative w-full h-5 rounded-full bg-[#0a0a0a] border border-[#3d2f1f] p-0.5 overflow-hidden shadow-inner">
+          <div
+            className={`h-full rounded-full bg-gradient-to-r ${getProgressColor(stats.completionPercentage)} transition-all duration-1000 relative`}
+            style={{ width: `${Math.max(stats.completionPercentage, 2)}%` }}
+          >
+            {/* Shimmer overlay */}
+            <div className="absolute inset-0 bg-white/20 animate-pulse" />
+          </div>
+        </div>
+
+        {/* Breakdown ticks */}
+        <div className="mt-3 flex items-center justify-between text-[11px] font-mono text-[#8a7c5c]">
+          <span>0% (Início)</span>
+          <span>30% (MVP Básico)</span>
+          <span>70% (Alpha Fechado)</span>
+          <span>100% (Lançamento MMORPG)</span>
+        </div>
+      </div>
+
+      {/* Main Grid: Category Progress + Recent Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Left 2 Cols: Category Progress Breakdown */}
+        <div className="lg:col-span-2 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-cinzel font-bold text-[#f0d98c] flex items-center gap-2">
+              <Compass size={18} className="text-[#c9a961]" />
+              <span>Progresso por Categoria de Assets</span>
+            </h3>
+            <button
+              onClick={() => setActiveTab('categories')}
+              className="text-xs font-cinzel text-[#c9a961] hover:text-[#f0d98c] flex items-center gap-1 transition-colors"
+            >
+              <span>Ver todas (8)</span>
+              <ArrowRight size={13} />
             </button>
           </div>
 
-          {/* Desktop Table View */}
-          <div className="hidden sm:block overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="border-b border-slate-100 text-slate-400 dark:border-slate-800 font-semibold uppercase tracking-wider text-[10px]">
-                <tr>
-                  <th className="py-2.5 px-3">Data</th>
-                  <th className="py-2.5 px-3">Descrição & Contato</th>
-                  <th className="py-2.5 px-3">Categoria</th>
-                  <th className="py-2.5 px-3">Pagamento</th>
-                  <th className="py-2.5 px-3">Status</th>
-                  <th className="py-2.5 px-3 text-right">Valor</th>
-                  <th className="py-2.5 px-3 text-center">Anexo</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
-                {recentTransactions.map((tx) => {
-                  const cat = categoriesMap.get(tx.categoryId);
-                  return (
-                    <tr
-                      key={tx.id}
-                      className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors"
-                    >
-                      <td className="py-3 px-3 font-mono text-slate-500 whitespace-nowrap">
-                        {formatDate(tx.date)}
-                      </td>
-                      <td className="py-3 px-3">
-                        <p className="font-semibold text-slate-800 dark:text-slate-100 line-clamp-1">
-                          {tx.description}
-                        </p>
-                        {tx.entityName && (
-                          <span className="text-[11px] text-slate-400">{tx.entityName}</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-3 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
-                          {cat && (
-                            <span
-                              className="h-2 w-2 rounded-full shrink-0"
-                              style={{ backgroundColor: cat.color }}
-                            />
-                          )}
-                          <span className="text-slate-600 dark:text-slate-300 truncate max-w-32">
-                            {cat?.name || 'Geral'}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-3 font-mono text-slate-500 whitespace-nowrap">
-                        {tx.paymentMethod}
-                      </td>
-                      <td className="py-3 px-3 whitespace-nowrap">
-                        <Badge status={tx.status} size="sm" />
-                      </td>
-                      <td
-                        className={`py-3 px-3 text-right font-mono font-bold whitespace-nowrap ${
-                          tx.type === 'receita'
-                            ? 'text-emerald-600 dark:text-emerald-400'
-                            : 'text-rose-600 dark:text-rose-400'
-                        }`}
-                      >
-                        {tx.type === 'receita' ? '+' : '- '}
-                        {formatCurrency(tx.amount, company.currencySymbol)}
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        {tx.attachment ? (
-                          <button
-                            type="button"
-                            onClick={() => setSelectedAttachmentTx(tx)}
-                            className="text-emerald-600 hover:text-emerald-700 p-1 rounded-md hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
-                            title={tx.attachment.name}
-                          >
-                            <FileText className="h-4 w-4" />
-                          </button>
-                        ) : (
-                          <span className="text-slate-300 dark:text-slate-600">-</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {categories.map(cat => {
+              const catStat = stats.byCategory[cat];
+              const details = CATEGORY_DETAILS[cat];
 
-          {/* Mobile Card List View */}
-          <div className="sm:hidden space-y-2.5">
-            {recentTransactions.map((tx) => {
-              const cat = categoriesMap.get(tx.categoryId);
-              const isIncome = tx.type === 'receita';
               return (
                 <div
-                  key={tx.id}
-                  className="p-3 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-800/30 flex flex-col gap-2"
+                  key={cat}
+                  onClick={() => handleCategoryClick(cat)}
+                  className="p-4 rounded-xl bg-[#141414] border border-[#3d2f1f] hover:border-[#c9a961]/60 transition-all cursor-pointer medieval-frame group hover:shadow-lg"
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                      <h5 className="font-bold text-xs text-slate-900 dark:text-white truncate">
-                        {tx.description}
-                      </h5>
-                      <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-slate-400">
-                        {cat && (
-                          <span
-                            className="h-2 w-2 rounded-full shrink-0"
-                            style={{ backgroundColor: cat.color }}
-                          />
-                        )}
-                        <span className="truncate">{cat?.name || 'Geral'}</span>
-                        {tx.entityName && <span>• {tx.entityName}</span>}
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <AssetIcon category={cat} size="sm" />
+                      <div className="min-w-0">
+                        <h4 className="text-xs font-cinzel font-bold text-[#e8d9b0] group-hover:text-[#f0d98c] truncate transition-colors">
+                          {details.label}
+                        </h4>
+                        <span className="text-[10px] text-[#8a7c5c] font-mono">
+                          {catStat.completed}/{catStat.total} concluídos
+                        </span>
                       </div>
                     </div>
 
-                    <div
-                      className={`font-mono font-bold text-xs text-right whitespace-nowrap ${
-                        isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
-                      }`}
-                    >
-                      {isIncome ? '+ ' : '- '}
-                      {formatCurrency(tx.amount, company.currencySymbol)}
-                    </div>
+                    <span className="text-xs font-mono font-bold text-[#c9a961] shrink-0">
+                      {catStat.pct}%
+                    </span>
                   </div>
 
-                  <div className="flex items-center justify-between pt-1.5 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-400 font-mono">
-                    <span>{formatDate(tx.date)} • {tx.paymentMethod}</span>
-                    <div className="flex items-center gap-1.5">
-                      <Badge status={tx.status} size="sm" />
-                      {tx.attachment && (
-                        <button
-                          type="button"
-                          onClick={() => setSelectedAttachmentTx(tx)}
-                          className="text-emerald-600 p-0.5"
-                        >
-                          <FileText className="h-3.5 w-3.5" />
-                        </button>
-                      )}
-                    </div>
+                  {/* Horizontal Bar */}
+                  <div className="w-full h-2 rounded-full bg-[#0a0a0a] border border-[#3d2f1f] overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${catStat.pct}%`,
+                        backgroundColor: catStat.pct >= 50 ? details.color : '#8a7c5c'
+                      }}
+                    />
                   </div>
                 </div>
               );
@@ -370,114 +337,105 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
 
-        {/* Upcoming Payables Card */}
-        <div className="lg:col-span-4 rounded-2xl bg-white p-4 sm:p-5 shadow-xs border border-slate-200/80 dark:bg-slate-900 dark:border-slate-800 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">
-                Próximos Vencimentos
-              </h3>
+        {/* Right 1 Col: Recent Activities & Motivational Lore */}
+        <div className="space-y-6">
+          
+          {/* Motivational Quote Widget */}
+          <div className="relative p-5 rounded-xl bg-gradient-to-b from-[#1c170f] to-[#141414] border border-[#c9a961]/40 shadow-md medieval-frame">
+            <div className="flex items-center justify-between mb-3 text-[#c9a961]">
+              <div className="flex items-center gap-1.5 text-xs font-cinzel font-bold uppercase tracking-wider">
+                <Quote size={14} />
+                <span>Sabedoria de Requiem</span>
+              </div>
               <button
-                type="button"
-                onClick={() => onNavigate('contas-pagar')}
-                className="text-xs font-semibold text-rose-600 hover:text-rose-700 dark:text-rose-400"
+                onClick={handleNextQuote}
+                className="p-1 rounded text-[#8a7c5c] hover:text-[#f0d98c] transition-colors"
+                title="Próxima frase"
               >
-                Gerenciar →
+                <RefreshCw size={14} />
               </button>
             </div>
-            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mb-3">
-              Contas com vencimento imediato ou em atraso
-            </p>
 
-            <div className="space-y-2.5">
-              {urgentPayables.length === 0 ? (
-                <div className="text-center py-6 text-xs text-slate-400">
-                  <CheckCircle2 className="h-7 w-7 text-emerald-500 mx-auto mb-1.5 opacity-80" />
-                  <p>Tudo em dia! Nenhuma conta vencendo.</p>
-                </div>
-              ) : (
-                urgentPayables.map((bill) => {
-                  const daysDiff = getDaysDiff(bill.dueDate);
-                  const isOverdue = daysDiff < 0;
-                  const isDueToday = daysDiff === 0;
+            <blockquote className="text-xs sm:text-sm italic text-[#e8d9b0] leading-relaxed mb-3">
+              "{currentQuote.quote}"
+            </blockquote>
 
-                  return (
-                    <div
-                      key={bill.id}
-                      className={`p-3 rounded-xl border transition-colors flex items-center justify-between gap-2.5 text-xs ${
-                        isOverdue
-                          ? 'border-rose-200 bg-rose-50/50 dark:border-rose-900/40 dark:bg-rose-950/20'
-                          : isDueToday
-                          ? 'border-amber-200 bg-amber-50/50 dark:border-amber-900/40 dark:bg-amber-950/20'
-                          : 'border-slate-200 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-800/30'
-                      }`}
-                    >
-                      <div className="min-w-0 flex-1">
-                        <h5 className="font-bold text-slate-800 dark:text-slate-100 truncate text-xs">
-                          {bill.description}
-                        </h5>
-                        <div className="flex items-center gap-2 mt-0.5 text-[10px]">
-                          <span className="text-slate-500 truncate">{bill.supplier}</span>
-                          <span
-                            className={`font-semibold font-mono ${
-                              isOverdue
-                                ? 'text-rose-600 dark:text-rose-400'
-                                : isDueToday
-                                ? 'text-amber-600 dark:text-amber-400'
-                                : 'text-slate-500'
-                            }`}
-                          >
-                            {isOverdue
-                              ? `Atrasado ${Math.abs(daysDiff)}d`
-                              : isDueToday
-                              ? 'Vence Hoje'
-                              : `Em ${daysDiff}d`}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="text-right shrink-0">
-                        <div className="font-bold font-mono text-xs text-slate-900 dark:text-white">
-                          {formatCurrency(bill.amount, company.currencySymbol)}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => onOpenPayBill(bill)}
-                          className="mt-1 text-[10px] font-bold text-rose-600 hover:text-rose-700 dark:text-rose-400 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded-lg shadow-2xs"
-                        >
-                          Quitar
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
+            <div className="text-right border-t border-[#3d2f1f]/60 pt-2 text-[11px]">
+              <span className="font-semibold text-[#f0d98c]">{currentQuote.author}</span>
+              <span className="text-[#8a7c5c] block text-[10px]">{currentQuote.source}</span>
             </div>
           </div>
 
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-            <button
-              type="button"
-              onClick={() => onNavigate('contas-pagar')}
-              className="w-full py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition-colors text-center"
-            >
-              Ver Todas as Contas a Pagar
-            </button>
+          {/* Últimas Atividades */}
+          <div className="p-5 rounded-xl bg-[#141414] border border-[#3d2f1f] shadow-md medieval-frame space-y-3">
+            <div className="flex items-center justify-between border-b border-[#3d2f1f] pb-2">
+              <h3 className="text-xs font-cinzel font-bold text-[#c9a961] uppercase tracking-wider flex items-center gap-1.5">
+                <TrendingUp size={14} />
+                <span>Últimas Modificações</span>
+              </h3>
+              <button
+                onClick={() => setActiveTab('assets')}
+                className="text-[11px] text-[#8a7c5c] hover:text-[#e8d9b0]"
+              >
+                Ver todos
+              </button>
+            </div>
+
+            <div className="space-y-2.5">
+              {recentAssets.map((asset: Asset) => (
+                <div
+                  key={asset.id}
+                  onClick={() => handleAssetClick(asset)}
+                  className="flex items-center justify-between gap-3 p-2 rounded-lg bg-[#0d0d0d] border border-[#3d2f1f]/50 hover:border-[#c9a961]/40 cursor-pointer transition-all group"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <AssetIcon asset={asset} size="sm" />
+                    <div className="min-w-0">
+                      <h4 className="text-xs font-cinzel font-semibold text-[#e8d9b0] group-hover:text-[#f0d98c] truncate transition-colors">
+                        {asset.name}
+                      </h4>
+                      <span className="text-[10px] text-[#8a7c5c] font-mono block">
+                        {formatRelativeTime(asset.updatedAt)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <StatusBadge status={asset.status} size="sm" />
+                </div>
+              ))}
+            </div>
           </div>
+
+          {/* Critical Watchlist */}
+          {criticalPendingAssets.length > 0 && (
+            <div className="p-4 rounded-xl bg-[#1f1111]/80 border border-[#c0392b]/40 shadow-md">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-cinzel font-bold text-[#e74c3c] flex items-center gap-1.5">
+                  <Flame size={14} className="animate-pulse" />
+                  <span>Prioridade Crítica Pendente</span>
+                </span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#c0392b]/20 text-[#e74c3c] border border-[#c0392b]/40">
+                  {criticalPendingAssets.length}
+                </span>
+              </div>
+
+              <div className="space-y-1.5">
+                {criticalPendingAssets.map((item: Asset) => (
+                  <div
+                    key={item.id}
+                    onClick={() => handleAssetClick(item)}
+                    className="flex items-center justify-between p-2 rounded bg-[#0d0d0d] border border-[#3d2f1f] hover:border-[#c0392b] cursor-pointer text-xs"
+                  >
+                    <span className="font-cinzel text-[#e8d9b0] truncate">{item.name}</span>
+                    <PriorityBadge priority={item.priority} size="sm" showLabel={false} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
-
-      {/* File Attachment Viewer Modal */}
-      {selectedAttachmentTx && (
-        <FileViewerModal
-          isOpen={!!selectedAttachmentTx}
-          onClose={() => setSelectedAttachmentTx(null)}
-          attachment={selectedAttachmentTx.attachment}
-          description={selectedAttachmentTx.description}
-          amountFormatted={formatCurrency(selectedAttachmentTx.amount, company.currencySymbol)}
-          entityName={selectedAttachmentTx.entityName}
-        />
-      )}
     </div>
   );
 };

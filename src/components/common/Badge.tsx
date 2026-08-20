@@ -1,70 +1,120 @@
 import React from 'react';
+import { 
+  CATEGORY_DETAILS, 
+  STATUS_DETAILS, 
+  PRIORITY_DETAILS, 
+  ORIGIN_DETAILS 
+} from '../../utils/formatters';
+import { AssetCategory, AssetOrigin, AssetStatus, Priority } from '../../types';
+import { Flame, ArrowUp, ArrowRight, ArrowDown, Clock, Loader2, CheckCircle2 } from 'lucide-react';
 
-interface BadgeProps {
-  status: 'recebido' | 'pago' | 'pendente' | 'vencido' | 'parcial' | 'receita' | 'despesa' | 'admin' | 'financeiro' | 'visualizador' | string;
-  size?: 'sm' | 'md' | 'lg';
-  className?: string;
-}
-
-export const Badge: React.FC<BadgeProps> = ({ status, size = 'md', className = '' }) => {
-  const normalized = status.toLowerCase();
-
-  let styles = 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
-  let label = status;
-
-  if (normalized === 'recebido' || normalized === 'pago') {
-    styles = 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-400 dark:border-emerald-800/60';
-    label = normalized === 'recebido' ? 'Recebido' : 'Pago';
-  } else if (normalized === 'pendente') {
-    styles = 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-800/60';
-    label = 'Pendente';
-  } else if (normalized === 'vencido') {
-    styles = 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/50 dark:text-rose-400 dark:border-rose-800/60';
-    label = 'Vencido';
-  } else if (normalized === 'parcial') {
-    styles = 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-400 dark:border-blue-800/60';
-    label = 'Pago Parcial';
-  } else if (normalized === 'receita') {
-    styles = 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-400 dark:border-emerald-800/60';
-    label = 'Entrada';
-  } else if (normalized === 'despesa') {
-    styles = 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/50 dark:text-rose-400 dark:border-rose-800/60';
-    label = 'Saída';
-  } else if (normalized === 'admin') {
-    styles = 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/50 dark:text-purple-400 dark:border-purple-800/60';
-    label = 'Administrador';
-  } else if (normalized === 'financeiro') {
-    styles = 'bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-950/50 dark:text-cyan-400 dark:border-cyan-800/60';
-    label = 'Financeiro';
-  } else if (normalized === 'visualizador') {
-    styles = 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
-    label = 'Visualizador';
-  }
-
-  const sizeClasses = {
-    sm: 'text-[10px] px-1.5 py-0.5 font-medium',
-    md: 'text-xs px-2.5 py-1 font-semibold',
-    lg: 'text-sm px-3 py-1.5 font-semibold',
-  }[size];
+export const CategoryBadge: React.FC<{ category: AssetCategory; size?: 'sm' | 'md' }> = ({ category, size = 'md' }) => {
+  const details = CATEGORY_DETAILS[category];
+  const sizeCls = size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-1 text-xs';
 
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full border tracking-wide uppercase font-mono ${sizeClasses} ${styles} ${className}`}
+    <span 
+      className={`inline-flex items-center gap-1.5 font-medium rounded border uppercase tracking-wider ${sizeCls}`}
+      style={{
+        backgroundColor: details.badgeBg,
+        borderColor: details.badgeBorder,
+        color: details.badgeText
+      }}
     >
-      <span
-        className={`w-1.5 h-1.5 rounded-full ${
-          normalized === 'recebido' || normalized === 'pago' || normalized === 'receita'
-            ? 'bg-emerald-500'
-            : normalized === 'pendente'
-            ? 'bg-amber-500 animate-pulse'
-            : normalized === 'vencido'
-            ? 'bg-rose-500'
-            : normalized === 'parcial'
-            ? 'bg-blue-500'
-            : 'bg-slate-400'
-        }`}
-      />
-      {label}
+      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: details.color }} />
+      {details.singular}
+    </span>
+  );
+};
+
+export const StatusBadge: React.FC<{ status: AssetStatus; size?: 'sm' | 'md'; interactive?: boolean; onClick?: () => void }> = ({ 
+  status, 
+  size = 'md',
+  interactive = false,
+  onClick
+}) => {
+  const details = STATUS_DETAILS[status];
+  const sizeCls = size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-1 text-xs';
+
+  const renderIcon = () => {
+    switch (status) {
+      case 'PENDING':
+        return <Clock size={12} className="text-[#bdc3c7]" />;
+      case 'IN_PROGRESS':
+        return <Loader2 size={12} className="text-[#f1c40f] animate-spin" />;
+      case 'COMPLETED':
+        return <CheckCircle2 size={12} className="text-[#2ecc71]" />;
+    }
+  };
+
+  return (
+    <span 
+      onClick={onClick}
+      className={`inline-flex items-center gap-1.5 font-medium rounded border transition-all ${sizeCls} ${
+        interactive ? 'cursor-pointer hover:brightness-125' : ''
+      }`}
+      style={{
+        backgroundColor: details.bg,
+        borderColor: details.border,
+        color: details.textColor
+      }}
+    >
+      {renderIcon()}
+      <span>{details.label}</span>
+    </span>
+  );
+};
+
+export const PriorityBadge: React.FC<{ priority: Priority; size?: 'sm' | 'md'; showLabel?: boolean }> = ({ 
+  priority, 
+  size = 'md',
+  showLabel = true 
+}) => {
+  const details = PRIORITY_DETAILS[priority];
+  const sizeCls = size === 'sm' ? 'px-1.5 py-0.5 text-xs' : 'px-2 py-0.5 text-xs';
+
+  const renderIcon = () => {
+    switch (priority) {
+      case 'CRITICAL':
+        return <Flame size={12} className="text-[#e74c3c] animate-pulse" />;
+      case 'HIGH':
+        return <ArrowUp size={12} className="text-[#f39c12]" />;
+      case 'MEDIUM':
+        return <ArrowRight size={12} className="text-[#f0d98c]" />;
+      case 'LOW':
+        return <ArrowDown size={12} className="text-[#95a5a6]" />;
+    }
+  };
+
+  return (
+    <span 
+      className={`inline-flex items-center gap-1 font-medium rounded border ${sizeCls}`}
+      style={{
+        backgroundColor: details.bg,
+        borderColor: details.border,
+        color: details.textColor
+      }}
+      title={`Prioridade ${details.label}`}
+    >
+      {renderIcon()}
+      {showLabel && <span>{details.label}</span>}
+    </span>
+  );
+};
+
+export const OriginBadge: React.FC<{ origin: AssetOrigin; size?: 'sm' | 'md' }> = ({ origin, size = 'sm' }) => {
+  const details = ORIGIN_DETAILS[origin];
+  const sizeCls = size === 'sm' ? 'px-1.5 py-0.5 text-[10px]' : 'px-2 py-0.5 text-xs';
+
+  return (
+    <span 
+      className={`inline-flex items-center font-mono font-bold rounded border uppercase tracking-wider bg-[#141414] ${sizeCls}`}
+      style={{
+        borderColor: details.color,
+        color: details.color
+      }}
+    >
+      {details.badge}
     </span>
   );
 };

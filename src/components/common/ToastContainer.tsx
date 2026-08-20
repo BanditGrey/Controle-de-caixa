@@ -1,48 +1,52 @@
 import React from 'react';
-import { useFinancial } from '../../context/FinancialContext';
-import { CheckCircle2, AlertCircle, AlertTriangle, Info, X } from 'lucide-react';
+import { useAssets } from '../../context/AssetContext';
+import { CheckCircle2, AlertTriangle, Info, XCircle, X } from 'lucide-react';
 
 export const ToastContainer: React.FC = () => {
-  const { toasts, removeToast } = useFinancial();
+  const { toasts, removeToast } = useAssets();
 
   if (toasts.length === 0) return null;
 
+  const icons: Record<'success' | 'warning' | 'error' | 'info', React.ReactNode> = {
+    success: <CheckCircle2 className="w-5 h-5 text-[#2ecc71] shrink-0" />,
+    warning: <AlertTriangle className="w-5 h-5 text-[#f39c12] shrink-0" />,
+    error: <XCircle className="w-5 h-5 text-[#c0392b] shrink-0" />,
+    info: <Info className="w-5 h-5 text-[#c9a961] shrink-0" />
+  };
+
+  const borderColors: Record<'success' | 'warning' | 'error' | 'info', string> = {
+    success: 'border-[#27ae60]',
+    warning: 'border-[#f39c12]',
+    error: 'border-[#c0392b]',
+    info: 'border-[#c9a961]'
+  };
+
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0">
-      {toasts.map((toast) => {
-        const icons = {
-          success: <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />,
-          error: <AlertCircle className="h-5 w-5 text-rose-500 shrink-0" />,
-          warning: <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0" />,
-          info: <Info className="h-5 w-5 text-blue-500 shrink-0" />,
-        };
-
-        const borderStyles = {
-          success: 'border-emerald-200 dark:border-emerald-800/80',
-          error: 'border-rose-200 dark:border-rose-800/80',
-          warning: 'border-amber-200 dark:border-amber-800/80',
-          info: 'border-blue-200 dark:border-blue-800/80',
-        }[toast.type];
-
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none">
+      {toasts.map(toast => {
         return (
           <div
             key={toast.id}
-            className={`pointer-events-auto flex items-start gap-3 p-4 bg-white dark:bg-slate-900 border rounded-2xl shadow-xl transition-all duration-300 animate-in slide-in-from-right ${borderStyles}`}
+            className={`pointer-events-auto relative flex items-start gap-3 p-3.5 rounded-lg bg-[#141414] border shadow-2xl transition-all duration-300 transform translate-y-0 ${borderColors[toast.type]} medieval-frame`}
           >
+            <div className="corner-ornament-tl !w-1.5 !h-1.5" />
+            <div className="corner-ornament-br !w-1.5 !h-1.5" />
             {icons[toast.type]}
-            <div className="flex-1 min-w-0">
-              {toast.title && (
-                <h4 className="text-sm font-semibold text-slate-900 dark:text-white">{toast.title}</h4>
+            <div className="flex-1 min-w-0 pr-2">
+              <h4 className="text-sm font-semibold font-cinzel text-[#e8d9b0] leading-tight">
+                {toast.title}
+              </h4>
+              {toast.description && (
+                <p className="text-xs text-[#8a7c5c] mt-0.5 leading-snug">
+                  {toast.description}
+                </p>
               )}
-              <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 leading-normal break-words">
-                {toast.message}
-              </p>
             </div>
             <button
               onClick={() => removeToast(toast.id)}
-              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-md"
+              className="text-[#8a7c5c] hover:text-[#e8d9b0] p-1 -mr-1 -mt-1 rounded transition-colors"
             >
-              <X className="h-4 w-4" />
+              <X size={14} />
             </button>
           </div>
         );
